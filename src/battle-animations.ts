@@ -11,6 +11,12 @@
  * @license MIT
  */
 
+import type {Battle, Pokemon, Side, WeatherState} from './battle';
+import type {BattleSceneStub} from './battle-scene-stub';
+import {BattleMoveAnims} from './battle-animations-moves';
+import {BattleLog} from './battle-log';
+import {BattleBGM, BattleSound} from './battle-sound';
+
 /*
 
 Most of this file is: CC0 (public domain)
@@ -30,7 +36,7 @@ This license DOES NOT extend to any other files in this repository.
 
 */
 
-class BattleScene {
+export class BattleScene implements BattleSceneStub {
 	battle: Battle;
 	animating = true;
 	acceleration = 1;
@@ -234,7 +240,7 @@ class BattleScene {
 		} else {
 			this.$frame.append('<div class="playbutton"><button name="play"><i class="fa fa-play"></i> Play</button><br /><br /><button name="play-muted" class="startsoundchooser" style="font-size:10pt;display:none">Play (music off)</button></div>');
 			this.$frame.find('div.playbutton button[name=play-muted]').click(() => {
-				this.battle.setMute(true);
+				this.setMute(true);
 				this.battle.play();
 			});
 		}
@@ -243,6 +249,9 @@ class BattleScene {
 	resume() {
 		this.$frame.find('div.playbutton').remove();
 		this.updateBgm();
+	}
+	setMute(muted: boolean) {
+		BattleSound.setMute(muted);
 	}
 	wait(time: number) {
 		if (!this.animating) return;
@@ -589,7 +598,7 @@ class BattleScene {
 		} else {
 			let statustext = '';
 			if (pokemon.hp !== pokemon.maxhp) {
-				statustext += Pokemon.getHPText(pokemon);
+				statustext += pokemon.getHPText();
 			}
 			if (pokemon.status) {
 				if (statustext) statustext += '|';
@@ -822,12 +831,14 @@ class BattleScene {
 				buf2 += '<div style="position:absolute;top:' + (y + 45) + 'px;left:' + (x - 40) + 'px;width:80px;font-size:10px;text-align:center;color:#FFF;">';
 				const gender = pokemon.gender;
 				if (gender === 'M' || gender === 'F') {
-					buf2 += `<img src="${Dex.resourcePrefix}fx/gender-${gender.toLowerCase()}.png" alt="${gender}" width="7" height="10" class="pixelated" style="margin-bottom:-1px" /> `;
+					buf2 += `<img src="${Dex.fxPrefix}gender-${gender.toLowerCase()}.png" alt="${gender}" width="7" height="10" class="pixelated" style="margin-bottom:-1px" /> `;
 				}
 				if (pokemon.level !== 100) {
 					buf2 += '<span style="text-shadow:#000 1px 1px 0,#000 1px -1px 0,#000 -1px 1px 0,#000 -1px -1px 0"><small>L</small>' + pokemon.level + '</span>';
 				}
-				if (pokemon.item) {
+				if (pokemon.item === '(mail)') {
+					buf2 += ' <img src="' + Dex.resourcePrefix + 'fx/mail.png" width="8" height="10" alt="F" style="margin-bottom:-1px" />';
+				} else if (pokemon.item) {
 					buf2 += ' <img src="' + Dex.resourcePrefix + 'fx/item.png" width="8" height="10" alt="F" style="margin-bottom:-1px" />';
 				}
 				buf2 += '</div>';
@@ -921,6 +932,8 @@ class BattleScene {
 			} else if (this.battle.weatherTimeLeft !== 0) {
 				weatherhtml += ` <small>(${this.battle.weatherTimeLeft} turn${this.battle.weatherTimeLeft === 1 ? '' : 's'})</small>`;
 			}
+			const nullifyWeather = this.battle.abilityActive(['Air Lock', 'Cloud Nine']);
+			weatherhtml = `${nullifyWeather ? '<s>' : ''}${weatherhtml}${nullifyWeather ? '</s>' : ''}`;
 		}
 
 		for (const pseudoWeather of this.battle.pseudoWeather) {
@@ -948,6 +961,9 @@ class BattleScene {
 		if (!this.animating) return;
 		let isIntense = false;
 		let weather = this.battle.weather;
+		if (this.battle.abilityActive(['Air Lock', 'Cloud Nine'])) {
+			weather = '' as ID;
+		}
 		let terrain = '' as ID;
 		for (const pseudoWeatherData of this.battle.pseudoWeather) {
 			let pwid = toID(pseudoWeatherData[0]);
@@ -1636,7 +1652,7 @@ class BattleScene {
 	}
 }
 
-interface ScenePos {
+export interface ScenePos {
 	/** - left, + right */
 	x?: number;
 	/** - down, + up */
@@ -1662,7 +1678,7 @@ interface InitScenePos {
 	display?: string;
 }
 
-class Sprite {
+export class Sprite {
 	scene: BattleScene;
 	$el: JQuery = null!;
 	sp: SpriteData;
@@ -1725,7 +1741,7 @@ class Sprite {
 	}
 }
 
-class PokemonSprite extends Sprite {
+export class PokemonSprite extends Sprite {
 	// HTML strings are constructed from this table and stored back in it to cache them
 	protected static statusTable: {[id: string]: [string, 'good' | 'bad' | 'neutral'] | null | string} = {
 		formechange: null,
@@ -1807,6 +1823,30 @@ class PokemonSprite extends Sprite {
 		laserfocus: ['Laser Focus', 'good'],
 		spotlight: ['Spotlight', 'neutral'],
 		itemremoved: null,
+		flinch: ['Flinched', 'bad'],
+		lockon: ['Taking aim', 'good'],
+		minimize: ['Minimized', 'bad'],
+		assist: ['Assist', 'neutral'],
+		sleeptalk: ['Sleep Talk', 'neutral'],
+		resistnormal: ['Resist Normal', 'good'],
+		resistfire: ['Resist Fire', 'good'],
+		resistwater: ['Resist Water', 'good'],
+		resistelectric: ['Resist Electric', 'good'],
+		resistgrass: ['Resist Grass', 'good'],
+		resistice: ['Resist Ice', 'good'],
+		resistfighting: ['Resist Fighting', 'good'],
+		resistpoison: ['Resist Poison', 'good'],
+		resistground: ['Resist Ground', 'good'],
+		resistflying: ['Resist Flying', 'good'],
+		resistpsychic: ['Resist Psychic', 'good'],
+		resistbug: ['Resist Bug', 'good'],
+		resistrock: ['Resist Rock', 'good'],
+		resistghost: ['Resist Ghost', 'good'],
+		resistdragon: ['Resist Dragon', 'good'],
+		resistdark: ['Resist Dark', 'good'],
+		resiststeel: ['Resist Steel', 'good'],
+		resistfairy: ['Resist Fairy', 'good'],
+		resisttypeless: ['Resist Typeless', 'good'],
 		// partial trapping
 		bind: ['Bind', 'bad'],
 		clamp: ['Clamp', 'bad'],
@@ -1818,6 +1858,8 @@ class PokemonSprite extends Sprite {
 		thundercage: ['Thunder Cage', 'bad'],
 		whirlpool: ['Whirlpool', 'bad'],
 		wrap: ['Wrap', 'bad'],
+		// Gen 1-2
+		mist: ['Mist', 'good'],
 		// Gen 1
 		lightscreen: ['Light Screen', 'good'],
 		reflect: ['Reflect', 'good'],
@@ -2434,7 +2476,16 @@ class PokemonSprite extends Sprite {
 		});
 		let oldsp = this.sp;
 		if (isPermanent) {
-			this.oldsp = null;
+			if (pokemon.volatiles.dynamax) {
+				// if a permanent forme change happens while dynamaxed, we need an undynamaxed sprite to go back to
+				this.oldsp = Dex.getSpriteData(pokemon, this.isFrontSprite, {
+					gen: this.scene.gen,
+					mod: this.scene.mod,
+					dynamax: false,
+				});
+			} else {
+				this.oldsp = null;
+			}
 		} else if (!this.oldsp) {
 			this.oldsp = oldsp;
 		}
@@ -2500,8 +2551,8 @@ class PokemonSprite extends Sprite {
 		});
 		this.scene.wait(500);
 
+		this.scene.updateSidebar(pokemon.side);
 		if (isPermanent) {
-			this.scene.updateSidebar(pokemon.side);
 			this.resetStatbar(pokemon);
 		} else {
 			this.updateStatbar(pokemon);
@@ -2616,7 +2667,7 @@ class PokemonSprite extends Sprite {
 		buf += `<strong>${BattleLog.escapeHTML(ignoreNick ? pokemon.speciesForme : pokemon.name)}`;
 		const gender = pokemon.gender;
 		if (gender === 'M' || gender === 'F') {
-			buf += ` <img src="${Dex.resourcePrefix}fx/gender-${gender.toLowerCase()}.png" alt="${gender}" width="7" height="10" class="pixelated" />`;
+			buf += ` <img src="${Dex.fxPrefix}gender-${gender.toLowerCase()}.png" alt="${gender}" width="7" height="10" class="pixelated" />`;
 		}
 		buf += (pokemon.level === 100 ? `` : ` <small>L${pokemon.level}</small>`);
 
@@ -2689,23 +2740,28 @@ class PokemonSprite extends Sprite {
 		}
 		let status = '';
 		if (pokemon.status === 'brn') {
-			status += '<span class="brn">BRN</span> ';
+			status += '<span class="brn">BRN (' + pokemon.statusData.severity + ')</span> ';
 		} else if (pokemon.status === 'psn') {
-			status += '<span class="psn">PSN</span> ';
+			status += '<span class="psn">PSN (' + pokemon.statusData.severity + ')</span> ';
 		} else if (pokemon.status === 'tox') {
-			status += '<span class="psn">TOX</span> ';
+			status += '<span class="psn">TOX (' + pokemon.statusData.severity + ')</span> ';
 		} else if (pokemon.status === 'slp') {
-			status += '<span class="slp">SLP</span> ';
+			status += '<span class="slp">SLP (' + pokemon.statusData.severity + ')</span> ';
 		} else if (pokemon.status === 'par') {
-			status += '<span class="par">PAR</span> ';
+			status += '<span class="par">PAR (' + pokemon.statusData.severity + ')</span> ';
 		} else if (pokemon.status === 'frz') {
-			status += '<span class="frz">FRZ</span> ';
+			status += '<span class="frz">FRZ (' + pokemon.statusData.severity + ')</span> ';
+		} else if (pokemon.status === 'aff') {
+			status += '<span class="aff">AFF (' + pokemon.statusData.severity + ')</span> ';
+		} else if (pokemon.status === 'tri') {
+			status += '<span class="tri">TRI (' + pokemon.statusData.severity + ')</span> ';
+		} else if (pokemon.status === 'all') {
+			status += '<span class="all">ALL (' + pokemon.statusData.severity + ')</span> ';
 		}
 		if (pokemon.volatiles.typechange && pokemon.volatiles.typechange[1]) {
-			let types = pokemon.volatiles.typechange[1].split('/');
-			status += '<img src="' + Dex.resourcePrefix + 'sprites/types/' + encodeURIComponent(types[0]) + '.png" alt="' + types[0] + '" class="pixelated" /> ';
-			if (types[1]) {
-				status += '<img src="' + Dex.resourcePrefix + 'sprites/types/' + encodeURIComponent(types[1]) + '.png" alt="' + types[1] + '" class="pixelated" /> ';
+			const types = pokemon.volatiles.typechange[1].split('/');
+			for (const type of types) {
+				status += '<img src="' + Dex.resourcePrefix + 'sprites/types/' + encodeURIComponent(type) + '.png" alt="' + type + '" class="pixelated" /> ';
 			}
 		}
 		if (pokemon.volatiles.typeadd) {
@@ -2719,25 +2775,26 @@ class PokemonSprite extends Sprite {
 		}
 
 		for (let i in pokemon.volatiles) {
-			status += PokemonSprite.getEffectTag(i);
+			status += PokemonSprite.getEffectTag(i, pokemon.volatiles[i][1]);
 		}
 		for (let i in pokemon.turnstatuses) {
 			if (i === 'roost' && !pokemon.getTypeList().includes('Flying')) continue;
-			status += PokemonSprite.getEffectTag(i);
+			status += PokemonSprite.getEffectTag(i, pokemon.turnstatuses[i][1]);
 		}
 		for (let i in pokemon.movestatuses) {
-			status += PokemonSprite.getEffectTag(i);
+			status += PokemonSprite.getEffectTag(i, pokemon.movestatuses[i][1]);
 		}
 		let statusbar = this.$statbar.find('.status');
 		statusbar.html(status);
 	}
 
-	private static getEffectTag(id: string) {
+	private static getEffectTag(id: string, severity: number | null = null) {
 		let effect = PokemonSprite.statusTable[id];
 		if (typeof effect === 'string') return effect;
 		if (effect === null) return PokemonSprite.statusTable[id] = '';
 		if (effect === undefined) effect = [`[[${id}]]`, 'neutral'];
-		return PokemonSprite.statusTable[id] = `<span class="${effect[1]}">${effect[0].replace(/ /g, '&nbsp;')}</span> `;
+		if (typeof severity !== 'number' || isNaN(severity) || effect[0] === 'Lightened') return PokemonSprite.statusTable[id] = `<span class="${effect[1]}">${effect[0].replace(/ /g, '&nbsp;')}</span> `;
+		return PokemonSprite.statusTable[id] = `<span class="${effect[1]}">${effect[0].replace(/ /g, '&nbsp;')} (` + severity + `)</span> `;
 	}
 
 	updateHPText(pokemon: Pokemon) {
@@ -2789,7 +2846,7 @@ interface AnimData {
 	prepareAnim?(scene: BattleScene, args: PokemonSprite[]): void;
 	residualAnim?(scene: BattleScene, args: PokemonSprite[]): void;
 }
-type AnimTable = {[k: string]: AnimData};
+export type AnimTable = {[k: string]: AnimData};
 
 const BattleEffects: {[k: string]: SpriteData} = {
 	wisp: {
@@ -3106,7 +3163,7 @@ const BattleBackdrops = [
 	'bg-skypillar.jpg',
 ];
 
-const BattleOtherAnims: AnimTable = {
+export const BattleOtherAnims: AnimTable = {
 	hitmark: {
 		anim(scene, [attacker]) {
 			scene.showEffect('hitmark', {
@@ -5692,7 +5749,7 @@ const BattleOtherAnims: AnimTable = {
 		},
 	},
 };
-const BattleStatusAnims: AnimTable = {
+export const BattleStatusAnims: AnimTable = {
 	brn: {
 		anim(scene, [attacker]) {
 			scene.showEffect('fireball', {
@@ -5876,6 +5933,395 @@ const BattleStatusAnims: AnimTable = {
 				opacity: 0,
 				time: 600,
 			}, 'linear', 'fade');
+		},
+	},
+	aff: {
+		anim(scene, [attacker]) {
+			//poison
+			scene.showEffect('poisonwisp', {
+				x: attacker.x + 30,
+				y: attacker.y - 40,
+				z: attacker.z,
+				scale: 0.2,
+				opacity: 1,
+				time: 0,
+			}, {
+				y: attacker.y,
+				scale: 1,
+				opacity: 0.5,
+				time: 300,
+			}, 'decel', 'fade');
+			scene.showEffect('poisonwisp', {
+				x: attacker.x - 30,
+				y: attacker.y - 40,
+				z: attacker.z,
+				scale: 0.2,
+				opacity: 1,
+				time: 100,
+			}, {
+				y: attacker.y,
+				scale: 1,
+				opacity: 0.5,
+				time: 400,
+			}, 'decel', 'fade');
+			scene.showEffect('poisonwisp', {
+				x: attacker.x,
+				y: attacker.y - 40,
+				z: attacker.z,
+				scale: 0.2,
+				opacity: 1,
+				time: 200,
+			}, {
+				y: attacker.y,
+				scale: 1,
+				opacity: 0.5,
+				time: 500,
+			}, 'decel', 'fade');
+			//sleep
+			scene.showEffect('wisp', {
+				x: attacker.x,
+				y: attacker.y + 20,
+				z: attacker.z,
+				scale: 0.5,
+				opacity: 0.1,
+			}, {
+				x: attacker.x,
+				y: attacker.y + 20,
+				z: attacker.behind(-50),
+				scale: 1.5,
+				opacity: 1,
+				time: 400,
+			}, 'ballistic2Under', 'fade');
+			scene.showEffect('wisp', {
+				x: attacker.x,
+				y: attacker.y + 20,
+				z: attacker.z,
+				scale: 0.5,
+				opacity: 0.1,
+				time: 200,
+			}, {
+				x: attacker.x,
+				y: attacker.y + 20,
+				z: attacker.behind(-50),
+				scale: 1.5,
+				opacity: 1,
+				time: 600,
+			}, 'ballistic2Under', 'fade');
+			//paralysis
+			scene.showEffect('electroball', {
+				x: attacker.x,
+				y: attacker.y,
+				z: attacker.z,
+				scale: 1.5,
+				opacity: 0.2,
+			}, {
+				scale: 2,
+				opacity: 0.1,
+				time: 300,
+			}, 'linear', 'fade');
+
+			attacker.delay(100);
+			attacker.anim({
+				x: attacker.x - 1,
+				time: 75,
+			}, 'swing');
+			attacker.anim({
+				x: attacker.x + 1,
+				time: 75,
+			}, 'swing');
+			attacker.anim({
+				x: attacker.x - 1,
+				time: 75,
+			}, 'swing');
+			attacker.anim({
+				x: attacker.x + 1,
+				time: 75,
+			}, 'swing');
+			attacker.anim({
+				x: attacker.x - 1,
+				time: 75,
+			}, 'swing');
+			attacker.anim({
+				time: 100,
+			}, 'accel');
+		},
+	},
+	tri: {
+		anim(scene, [attacker]) {
+			//burn
+			scene.showEffect('fireball', {
+				x: attacker.x - 20,
+				y: attacker.y - 15,
+				z: attacker.z,
+				scale: 0.2,
+				opacity: 0.3,
+			}, {
+				x: attacker.x + 40,
+				y: attacker.y + 15,
+				z: attacker.z,
+				scale: 1,
+				opacity: 1,
+				time: 300,
+			}, 'swing', 'fade');
+			//freeze
+			scene.showEffect('icicle', {
+				x: attacker.x - 30,
+				y: attacker.y,
+				z: attacker.z,
+				scale: 0.5,
+				opacity: 0.5,
+				time: 200,
+			}, {
+				scale: 0.9,
+				opacity: 0,
+				time: 600,
+			}, 'linear', 'fade');
+			scene.showEffect('icicle', {
+				x: attacker.x,
+				y: attacker.y - 30,
+				z: attacker.z,
+				scale: 0.5,
+				opacity: 0.5,
+				time: 300,
+			}, {
+				scale: 0.9,
+				opacity: 0,
+				time: 650,
+			}, 'linear', 'fade');
+			scene.showEffect('icicle', {
+				x: attacker.x + 15,
+				y: attacker.y,
+				z: attacker.z,
+				scale: 0.5,
+				opacity: 0.5,
+				time: 400,
+			}, {
+				scale: 0.9,
+				opacity: 0,
+				time: 700,
+			}, 'linear', 'fade');
+			scene.showEffect('wisp', {
+				x: attacker.x,
+				y: attacker.y,
+				z: attacker.z,
+				scale: 1,
+				opacity: 0.5,
+			}, {
+				scale: 3,
+				opacity: 0,
+				time: 600,
+			}, 'linear', 'fade');
+			//paralysis
+			scene.showEffect('electroball', {
+				x: attacker.x,
+				y: attacker.y,
+				z: attacker.z,
+				scale: 1.5,
+				opacity: 0.2,
+			}, {
+				scale: 2,
+				opacity: 0.1,
+				time: 300,
+			}, 'linear', 'fade');
+
+			attacker.delay(100);
+			attacker.anim({
+				x: attacker.x - 1,
+				time: 75,
+			}, 'swing');
+			attacker.anim({
+				x: attacker.x + 1,
+				time: 75,
+			}, 'swing');
+			attacker.anim({
+				x: attacker.x - 1,
+				time: 75,
+			}, 'swing');
+			attacker.anim({
+				x: attacker.x + 1,
+				time: 75,
+			}, 'swing');
+			attacker.anim({
+				x: attacker.x - 1,
+				time: 75,
+			}, 'swing');
+			attacker.anim({
+				time: 100,
+			}, 'accel');
+		},
+	},
+	all: {
+		anim(scene, [attacker]) {
+			//burn
+			scene.showEffect('fireball', {
+				x: attacker.x - 20,
+				y: attacker.y - 15,
+				z: attacker.z,
+				scale: 0.2,
+				opacity: 0.3,
+			}, {
+				x: attacker.x + 40,
+				y: attacker.y + 15,
+				z: attacker.z,
+				scale: 1,
+				opacity: 1,
+				time: 300,
+			}, 'swing', 'fade');
+			//freeze
+			scene.showEffect('icicle', {
+				x: attacker.x - 30,
+				y: attacker.y,
+				z: attacker.z,
+				scale: 0.5,
+				opacity: 0.5,
+				time: 200,
+			}, {
+				scale: 0.9,
+				opacity: 0,
+				time: 600,
+			}, 'linear', 'fade');
+			scene.showEffect('icicle', {
+				x: attacker.x,
+				y: attacker.y - 30,
+				z: attacker.z,
+				scale: 0.5,
+				opacity: 0.5,
+				time: 300,
+			}, {
+				scale: 0.9,
+				opacity: 0,
+				time: 650,
+			}, 'linear', 'fade');
+			scene.showEffect('icicle', {
+				x: attacker.x + 15,
+				y: attacker.y,
+				z: attacker.z,
+				scale: 0.5,
+				opacity: 0.5,
+				time: 400,
+			}, {
+				scale: 0.9,
+				opacity: 0,
+				time: 700,
+			}, 'linear', 'fade');
+			scene.showEffect('wisp', {
+				x: attacker.x,
+				y: attacker.y,
+				z: attacker.z,
+				scale: 1,
+				opacity: 0.5,
+			}, {
+				scale: 3,
+				opacity: 0,
+				time: 600,
+			}, 'linear', 'fade');
+			//paralysis
+			scene.showEffect('electroball', {
+				x: attacker.x,
+				y: attacker.y,
+				z: attacker.z,
+				scale: 1.5,
+				opacity: 0.2,
+			}, {
+				scale: 2,
+				opacity: 0.1,
+				time: 300,
+			}, 'linear', 'fade');
+
+			attacker.delay(100);
+			attacker.anim({
+				x: attacker.x - 1,
+				time: 75,
+			}, 'swing');
+			attacker.anim({
+				x: attacker.x + 1,
+				time: 75,
+			}, 'swing');
+			attacker.anim({
+				x: attacker.x - 1,
+				time: 75,
+			}, 'swing');
+			attacker.anim({
+				x: attacker.x + 1,
+				time: 75,
+			}, 'swing');
+			attacker.anim({
+				x: attacker.x - 1,
+				time: 75,
+			}, 'swing');
+			attacker.anim({
+				time: 100,
+			}, 'accel');
+			//poison
+			scene.showEffect('poisonwisp', {
+				x: attacker.x + 30,
+				y: attacker.y - 40,
+				z: attacker.z,
+				scale: 0.2,
+				opacity: 1,
+				time: 0,
+			}, {
+				y: attacker.y,
+				scale: 1,
+				opacity: 0.5,
+				time: 300,
+			}, 'decel', 'fade');
+			scene.showEffect('poisonwisp', {
+				x: attacker.x - 30,
+				y: attacker.y - 40,
+				z: attacker.z,
+				scale: 0.2,
+				opacity: 1,
+				time: 100,
+			}, {
+				y: attacker.y,
+				scale: 1,
+				opacity: 0.5,
+				time: 400,
+			}, 'decel', 'fade');
+			scene.showEffect('poisonwisp', {
+				x: attacker.x,
+				y: attacker.y - 40,
+				z: attacker.z,
+				scale: 0.2,
+				opacity: 1,
+				time: 200,
+			}, {
+				y: attacker.y,
+				scale: 1,
+				opacity: 0.5,
+				time: 500,
+			}, 'decel', 'fade');
+			//sleep
+			scene.showEffect('wisp', {
+				x: attacker.x,
+				y: attacker.y + 20,
+				z: attacker.z,
+				scale: 0.5,
+				opacity: 0.1,
+			}, {
+				x: attacker.x,
+				y: attacker.y + 20,
+				z: attacker.behind(-50),
+				scale: 1.5,
+				opacity: 1,
+				time: 400,
+			}, 'ballistic2Under', 'fade');
+			scene.showEffect('wisp', {
+				x: attacker.x,
+				y: attacker.y + 20,
+				z: attacker.z,
+				scale: 0.5,
+				opacity: 0.1,
+				time: 200,
+			}, {
+				x: attacker.x,
+				y: attacker.y + 20,
+				z: attacker.behind(-50),
+				scale: 1.5,
+				opacity: 1,
+				time: 600,
+			}, 'ballistic2Under', 'fade');
 		},
 	},
 	flinch: {

@@ -249,7 +249,10 @@ License: GPLv2
 .statbar span.psn,
 .statbar span.slp,
 .statbar span.par,
-.statbar span.frz {
+.statbar span.frz,
+.statbar span.aff,
+.statbar span.tri,
+.statbar span.all {
 	padding: 1px 2px;
 	border: 0;
 	border-radius: 3px;
@@ -272,6 +275,18 @@ License: GPLv2
 }
 .statbar span.frz {
 	background: #009AA4;
+	color: #FFFFFF;
+}
+.statbar span.aff {
+	background: #2B4E00;
+	color: #FFFFFF;
+}
+.statbar span.tri {
+	background: #565656;
+	color: #FFFFFF;
+}
+.statbar span.all {
+	background: #0400FF;
 	color: #FFFFFF;
 }
 .statbar span.bad {
@@ -509,6 +524,18 @@ License: GPLv2
 .battle .frzresult strong {
 	color: #FFFFFF;
 	background: #009AA4;
+}
+.battle .affresult strong {
+	color: #FFFFFF;
+	background: #2B4E00;
+}
+.battle .triresult strong {
+	color: #FFFFFF;
+	background: #565656;
+}
+.battle .allresult strong {
+	color: #FFFFFF;
+	background: #0400FF;
 }
 .battle .abilityresult strong {
 	color: #FFFFFF;

@@ -13,7 +13,7 @@ body {
 	font-size: 11pt;
 	font-family: Verdana, Helvetica, Arial, sans-serif;
 
-	/* see http://pokemonshowdown.com/credits */
+	/* see https://pokemonshowdown.com/credits */
 	background: #344b6c url(../fx/client-bg-charizards.jpg) no-repeat left center fixed;
 	-webkit-background-size: cover;
 	-moz-background-size: cover;
@@ -946,11 +946,11 @@ p.or:after {
 }
 .mainmenufooter a {
 	text-decoration: underline;
-	color: #99BBEE;
+	color: #DB6558 !important;
 }
 .mainmenufooter a:hover {
 	text-decoration: underline;
-	color: #CCDDFF;
+	color: #D6AEAB !important;
 }
 
 .pmbox {
@@ -1308,6 +1308,20 @@ p.or:after {
 	color: #224466;
 	text-decoration: none;
 }
+.roomlist .subrooms {
+	font-size: 8pt;
+	padding-left: 20px;
+	margin: -5px 0 4px;
+}
+.roomlist .subrooms i.fa-level-up {
+	margin-right: 5px;
+}
+.roomlist .subrooms a.ilink {
+	display: inline-block;
+	margin: 0;
+	vertical-align: middle;
+	font-size: 8pt;
+}
 
 /*********************************************************
  * Chat
@@ -1359,6 +1373,9 @@ p.or:after {
 	font-weight: normal;
 	font-size: 8pt;
 	color: #888888;
+}
+.chat .message-announce small {
+    color: #def;
 }
 .chat.timer {
 	color: #992222;
@@ -2067,6 +2084,15 @@ a.ilink.yours {
 }
 .status.frz {
 	background: #009AA4;
+}
+.status.aff {
+	background: #2B4E00;
+}
+.status.tri {
+	background: #565656;
+}
+.status.all {
+	background: #0400FF;
 }
 
 .movemenu button {
@@ -3230,7 +3256,7 @@ a.ilink.yours {
 .avatarlist button {
 	width: 80px;
 	height: 80px;
-	background: transparent url(//play.pokemonshowdown.com/sprites/trainers-sheet.png) no-repeat scroll 0px 0px;
+	background: transparent url(../sprites/trainers-sheet.png) no-repeat scroll 0px 0px;
 }
 .bglist button span {
 	display: block;

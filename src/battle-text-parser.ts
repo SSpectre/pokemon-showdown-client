@@ -584,6 +584,10 @@ class BattleTextParser {
 				const template = this.template('activate', 'perishsong');
 				return line1 + template.replace('[POKEMON]', this.pokemon(pokemon)).replace('[NUMBER]', num);
 			}
+			if (id === 'lockon' || id === 'mindreader') {
+				const template = this.template('start', effect);
+				return line1 + template.replace('[POKEMON]', this.pokemon(kwArgs.of)).replace('[SOURCE]', this.pokemon(pokemon));
+			}
 			let templateId = 'start';
 			if (kwArgs.already) templateId = 'alreadyStarted';
 			if (kwArgs.fatigue) templateId = 'startFromFatigue';
@@ -591,6 +595,7 @@ class BattleTextParser {
 			if (kwArgs.damage) templateId = 'activate';
 			if (kwArgs.block) templateId = 'block';
 			if (kwArgs.upkeep) templateId = 'upkeep';
+			if (id === 'mist' && this.gen <= 2) templateId = 'startGen' + this.gen;
 			if (id === 'reflect' || id === 'lightscreen') templateId = 'startGen1';
 			if (templateId === 'start' && kwArgs.from?.startsWith('item:')) {
 				templateId += 'FromItem';
@@ -832,12 +837,12 @@ class BattleTextParser {
 
 			let line1 = this.maybeAbility(effect, pokemon);
 
-			if (id === 'lockon' || id === 'mindreader') {
-				const template = this.template('start', effect);
-				return line1 + template.replace('[POKEMON]', this.pokemon(kwArgs.of)).replace('[SOURCE]', this.pokemon(pokemon));
-			}
+			// if (id === 'lockon' || id === 'mindreader') {
+			// 	const template = this.template('start', effect);
+			// 	return line1 + template.replace('[POKEMON]', this.pokemon(kwArgs.of)).replace('[SOURCE]', this.pokemon(pokemon));
+			// }
 
-			if (id === 'mummy') {
+			if (id === 'mummy' && kwArgs.ability) {
 				line1 += this.ability(kwArgs.ability, target);
 				line1 += this.ability('Mummy', target);
 				const template = this.template('changeAbility', 'mummy');
@@ -922,7 +927,7 @@ class BattleTextParser {
 		case '-boost': case '-unboost': {
 			let [, pokemon, stat, num] = args;
 			if (stat === 'spa' && this.gen === 1) stat = 'spc';
-			const amount = parseInt(num, 10);
+			const amount = parseFloat(num);
 			const line1 = this.maybeAbility(kwArgs.from, kwArgs.of || pokemon);
 			let templateId = cmd.slice(1);
 			if (amount >= 3) templateId += '3';
@@ -996,7 +1001,10 @@ class BattleTextParser {
 		case '-block': {
 			let [, pokemon, effect, move, attacker] = args;
 			const line1 = this.maybeAbility(effect, kwArgs.of || pokemon);
-			const template = this.template('block', effect);
+			let id = BattleTextParser.effectId(effect);
+			let templateId = 'block';
+			if (id === 'mist' && this.gen <= 2) templateId = 'blockGen' + this.gen;
+			const template = this.template(templateId, effect);
 			return line1 + template.replace('[POKEMON]', this.pokemon(pokemon)).replace('[SOURCE]', this.pokemon(attacker || kwArgs.of)).replace('[MOVE]', move);
 		}
 
@@ -1023,7 +1031,7 @@ class BattleTextParser {
 			}
 
 			templateId = 'fail';
-			if (['brn', 'frz', 'par', 'psn', 'slp', 'substitute'].includes(id)) {
+			if (['brn', 'frz', 'par', 'psn', 'slp', 'tox', 'aff', 'tri', 'all', 'substitute'].includes(id)) {
 				templateId = 'alreadyStarted';
 			}
 			if (kwArgs.heavy) templateId = 'failTooHeavy';
