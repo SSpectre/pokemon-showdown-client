@@ -19,7 +19,7 @@ Config.whitelist = [
 // address bar is `Config.routes.client`.
 Config.defaultserver = {
 	id: 'luckless',
-	host: '143.198.34.18',
+	host: 'play.luckless.imlgames.com',
 	port: 443,
 	httpport: 8000,
 	altport: 80,
@@ -37,7 +37,7 @@ Config.version = "0.11.2 (5c66dce8)";
 
 Config.routes = {
 	root: 'pokemonshowdown.com',
-	client: 'old.luckless.imlgames.com',
+	client: 'luckless.imlgames.com',
 	dex: 'dex.pokemonshowdown.com',
 	replays: 'replay.pokemonshowdown.com',
 	users: 'pokemonshowdown.com/users',
