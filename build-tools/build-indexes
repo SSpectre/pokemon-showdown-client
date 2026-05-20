@@ -394,7 +394,7 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 					if (species.tier === 'CAP LC') tier = 'LC';
 					if (species.tier === 'CAP NFE') tier = 'NFE';
 					if (species.tier === 'CAP') tier = 'OU';
-					const format = Dex.formats.get('gen8metronomebattle');
+					const format = Dex.formats.get(gen + 'metronomebattle');
 					let bst = 0;
 					for (const stat of Object.values(species.baseStats)) {
 						bst += stat;
@@ -527,7 +527,7 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 			BattleTeambuilderTable[gen + 'doubles'].tiers = tiers;
 			BattleTeambuilderTable[gen + 'doubles'].overrideTier = overrideTier;
 			BattleTeambuilderTable[gen + 'doubles'].formatSlices = formatSlices;
-		} else if (gen === 'gen8') {
+		} else if (gen === 'gen7') {
 			BattleTeambuilderTable.tiers = tiers;
 			BattleTeambuilderTable.items = items;
 			BattleTeambuilderTable.overrideTier = overrideTier;
@@ -643,7 +643,7 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 				}
 			}
 			if (isMetBattle) {
-				const banlist = Dex.formats.getRuleTable(Dex.formats.get('gen8metronomebattle'));
+				const banlist = Dex.formats.getRuleTable(Dex.formats.get(gen + 'metronomebattle'));
 				if (banlist.isBanned('item:' + item.id)) continue;
 			}
 			switch (id) {
