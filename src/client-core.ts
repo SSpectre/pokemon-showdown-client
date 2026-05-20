@@ -191,7 +191,7 @@ const PSBackground = new class extends PSStreamModel {
 				this.set('', bg[0]);
 			} else if (bg.length === 2) {
 				this.set(bg[0], bg[1]);
-			} else if (bg.length >= 7) {
+			} else if (bg.length >= 6) {
 				this.set(bg[0], bg[1], bg.slice(2));
 			}
 		} catch {}
