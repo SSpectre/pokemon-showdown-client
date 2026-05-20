@@ -18,7 +18,7 @@ Config.whitelist = [
 // `defaultserver` specifies the server to use when the domain name in the
 // address bar is `Config.routes.client`.
 Config.defaultserver = {
-	id: 'showdown',
+	id: 'luckless',
 	host: 'play.luckless.imlgames.com',
 	port: 443,
 	httpport: 8000,
