@@ -15,7 +15,7 @@
 		initialize: function () {
 			// April Fool's 2016 - Digimon Showdown
 			// this.$el.html('<img class="logo" src="' + Dex.resourcePrefix + 'sprites/afd/digimonshowdown.png" alt="Digimon Showdown! (beta)" width="146" height="44" /><div class="maintabbarbottom"></div><div class="tabbar maintabbar"><div class="inner"></div></div><div class="userbar"></div>');
-			this.$el.html('<img class="logo" src="http://luckless.imlgames.com/pokemonshowdownluckless.png" srcset="http://luckless.imlgames.com/pokemonshowdownluckless@2x.png 2x" alt="Pok&eacute;mon Showdown! - Luckless" width="146" height="44" /><div class="maintabbarbottom"></div><div class="tabbar maintabbar"><div class="inner"></div></div><div class="userbar"></div>');
+			this.$el.html('<img class="logo" src="https://luckless.imlgames.com/pokemonshowdownluckless.png" srcset="https://luckless.imlgames.com/pokemonshowdownluckless@2x.png 2x" alt="Pok&eacute;mon Showdown! - Luckless" width="146" height="44" /><div class="maintabbarbottom"></div><div class="tabbar maintabbar"><div class="inner"></div></div><div class="userbar"></div>');
 			this.$tabbar = this.$('.maintabbar .inner');
 			// this.$sidetabbar = this.$('.sidetabbar');
 			this.$userbar = this.$('.userbar');
