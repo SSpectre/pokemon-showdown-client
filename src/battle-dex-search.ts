@@ -574,6 +574,7 @@ abstract class BattleTypedSearch<T extends SearchType> {
 		this.baseResults = null;
 		this.baseIllegalResults = null;
 
+		console.log(format);
 		if (format.slice(0, 3) === 'gen') {
 			const gen = (Number(format.charAt(3)) || 6);
 			format = (format.slice(4) || 'customgame') as ID;
@@ -874,7 +875,6 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 		const dex = this.dex;
 
 		let table = BattleTeambuilderTable;
-		console.log(dex.gen + ", " + format + ", " + this.formatType);
 		if ((format.endsWith('cap') || format.endsWith('caplc')) && dex.gen < 8) {
 			table = table['gen' + dex.gen];
 		} else if (isVGCOrBS) {
