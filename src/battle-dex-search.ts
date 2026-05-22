@@ -874,6 +874,7 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 		const dex = this.dex;
 
 		let table = BattleTeambuilderTable;
+		console.log(dex.gen + ", " + format + ", " + this.formatType);
 		if ((format.endsWith('cap') || format.endsWith('caplc')) && dex.gen < 8) {
 			table = table['gen' + dex.gen];
 		} else if (isVGCOrBS) {
