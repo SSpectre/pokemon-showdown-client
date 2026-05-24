@@ -1051,13 +1051,15 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 	//
 
 	for (const mod of ['gen7letsgo', 'gen8bdsp', 'gen7luckless']) {
-		if (mod === 'gen7luckless') {
-			BattleTeambuilderTable[mod] = {};
-		}
+		
 		const modDex = Dex.mod(mod);
 		const modData = modDex.data;
 		const parentDex = Dex.forGen(modDex.gen);
 		const parentData = parentDex.data;
+
+		if (mod === 'gen7luckless') {
+			BattleTeambuilderTable[mod] = BattleTeambuilderTable['gen7'];
+		}
 
 		const overrideSpeciesData = {};
 		BattleTeambuilderTable[mod].overrideSpeciesData = overrideSpeciesData;
@@ -1096,6 +1098,16 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 					if (!overrideAbilityData[id]) overrideAbilityData[id] = {};
 					overrideAbilityData[id][key] = modEntry[key];
 				}
+			}
+		}
+
+		const overrideItemDesc = {};
+		BattleTeambuilderTable[mod].overrideItemDesc = overrideItemDesc;
+		for (const id in modData.Items) {
+			const modEntry = modDex.items.get(id);
+			const parentEntry = parentDex.items.get(id);
+			if ((modEntry.shortDesc || modEntry.desc) !== (parentEntry.shortDesc || parentEntry.desc)) {
+				overrideItemDesc[id] = (modEntry.shortDesc || modEntry.desc);
 			}
 		}
 	}

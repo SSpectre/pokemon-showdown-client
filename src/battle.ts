@@ -3350,6 +3350,9 @@ export class Battle {
 			if (this.tier.includes(`Let's Go`)) {
 				this.dex = Dex.mod('gen7letsgo' as ID);
 			}
+			if (this.tier.includes(`Luckless`)) {
+				this.dex = Dex.mod('gen7luckless' as ID);
+			}
 			this.log(args);
 			break;
 		}

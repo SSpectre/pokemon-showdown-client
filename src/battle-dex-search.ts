@@ -551,7 +551,7 @@ abstract class BattleTypedSearch<T extends SearchType> {
 	set: PokemonSet | null = null;
 
 	protected formatType: 'doubles' | 'bdsp' | 'bdspdoubles' | 'letsgo' | 'metronome' | 'natdex' | 'nfe' |
-	'dlc1' | 'dlc1doubles' | 'stadium' | null = null;
+	'dlc1' | 'dlc1doubles' | 'stadium' | 'luckless' | null = null;
 
 	/**
 	 * Cached copy of what the results list would be with only base filters
@@ -627,6 +627,12 @@ abstract class BattleTypedSearch<T extends SearchType> {
 			this.formatType = 'nfe';
 			if (!format) format = 'ou' as ID;
 		}
+		if (format.includes('luckless')) {
+			format = format.slice(8) as ID;
+			this.formatType = 'luckless';
+			this.dex = Dex.mod('gen7luckless' as ID);
+		}
+
 		this.format = format;
 
 		this.species = '' as ID;
@@ -908,6 +914,8 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 			}
 		} else if (this.formatType === 'stadium') {
 			table = table['gen' + dex.gen + 'stadium' + (dex.gen > 1 ? dex.gen : '')];
+		} else if (this.formatType === 'luckless') {
+			table = table['gen7luckless'];
 		}
 
 		if (!table.tierSet) {
@@ -1139,6 +1147,9 @@ class BattleItemSearch extends BattleTypedSearch<'item'> {
 			table = table['natdex'];
 		} else if (this.formatType === 'metronome') {
 			table = table['metronome'];
+		} else if (this.formatType === 'luckless') {
+			table = table['gen7luckless'];
+			console.log(table);
 		} else if (this.dex.gen < 8) {
 			table = table['gen' + this.dex.gen];
 		}

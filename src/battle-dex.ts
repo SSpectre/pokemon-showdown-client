@@ -201,6 +201,7 @@ const Dex = new class implements ModdedDex {
 		if (modid in this.moddedDexes) {
 			return this.moddedDexes[modid];
 		}
+		
 		this.moddedDexes[modid] = new ModdedDex(modid);
 		return this.moddedDexes[modid];
 	}
@@ -883,11 +884,17 @@ class ModdedDex {
 
 			let data = {...Dex.items.get(name)};
 
-			for (let i = this.gen; i < 8; i++) {
+			for (let i = this.gen; i < 7; i++) {
 				const table = window.BattleTeambuilderTable['gen' + i];
 				if (id in table.overrideItemDesc) {
 					data.shortDesc = table.overrideItemDesc[id];
 					break;
+				}
+			}
+			if (this.modid !== `gen${this.gen}`) {
+				const table = window.BattleTeambuilderTable[this.modid];
+				if (id in table.overrideItemDesc) {
+					data.shortDesc = table.overrideItemDesc[id];
 				}
 			}
 
@@ -914,6 +921,7 @@ class ModdedDex {
 					Object.assign(data, table.overrideAbilityData[id]);
 				}
 			}
+			
 			if (this.modid !== `gen${this.gen}`) {
 				const table = window.BattleTeambuilderTable[this.modid];
 				if (id in table.overrideAbilityData) {
